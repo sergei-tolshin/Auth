@@ -1,0 +1,32 @@
+Изменение адреса электронной почты
+---
+tags:
+  - account
+security:
+  - Bearer: []
+parameters:
+  - in: body
+    name: body
+    schema:
+      required:
+      - current_email
+      - new_email
+      properties:
+        current_email:
+          type: string
+          format: email
+        new_email:
+          type: string
+          format: email
+        logout_everywhere:
+          type: boolean
+    required: true
+responses:
+  200:
+    description: Success
+  401:
+    description: Missing Authorization Header
+  422:
+    description: Signature verification failed
+  422:
+    description: The email address already exists

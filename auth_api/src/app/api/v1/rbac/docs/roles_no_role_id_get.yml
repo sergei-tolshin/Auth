@@ -1,0 +1,26 @@
+Список ролей
+---
+tags:
+  - rbac
+security:
+  - Bearer: []
+responses:
+  200:
+    description: Success
+    schema:
+      type: array
+      items:
+        $ref: '#/definitions/Role'
+  401:
+    description: Missing Authorization Header
+  422:
+    description: Signature verification failed
+definitions:
+  Role:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string

@@ -1,0 +1,27 @@
+Изменение профиля
+---
+tags:
+  - account
+security:
+  - Bearer: []
+parameters:
+  - in: body
+    name: body
+    schema:
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        birth_date:
+          type: string
+          format: date
+        phone:
+          type: string
+responses:
+  200:
+    description: Profile updated
+  401:
+    description: Missing Authorization Header
+  422:
+    description: Signature verification failed

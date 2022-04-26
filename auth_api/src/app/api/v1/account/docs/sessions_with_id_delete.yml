@@ -1,0 +1,19 @@
+Завершить сеанс
+---
+tags:
+  - account
+parameters:
+  - name: session_id
+    in: path
+    required: true
+    type: string
+    format: uuid
+security:
+  - Bearer: []
+responses:
+  204:
+    description: Session deleted
+  401:
+    description: Missing Authorization Header
+  422:
+    description: Signature verification failed

@@ -1,0 +1,31 @@
+Отозвать у пользователей роль
+---
+tags:
+  - rbac
+parameters:
+  - in: path
+    name: role_id
+    required: true
+    type: string
+    format: uuid
+  - in: body
+    name: body
+    required: true
+    schema:
+      properties:
+        users:
+          type: array
+          items:
+            type: string
+            format: uuid
+security:
+  - Bearer: []
+responses:
+  200:
+    description: Role "name" removed from users
+  401:
+    description: Missing Authorization Header
+  404:
+    description: Role not found
+  422:
+    description: Signature verification failed

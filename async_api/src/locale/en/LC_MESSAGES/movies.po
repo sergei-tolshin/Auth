@@ -1,0 +1,35 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2022-03-24 21:05+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+msgid "films_not_found"
+msgstr "films not found"
+
+msgid "film_not_found"
+msgstr "film not found"
+
+msgid "genre_not_found"
+msgstr "genre not found"
+
+msgid "genres_not_found"
+msgstr "genres not found"
+
+msgid "persons_not_found"
+msgstr "persons not found"
+
+msgid "person_not_found"
+msgstr "person not found"
+

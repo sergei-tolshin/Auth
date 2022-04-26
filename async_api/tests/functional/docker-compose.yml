@@ -1,0 +1,75 @@
+version: '3.8'
+services:
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+    container_name: elastic_test
+    environment:
+      - node.name=elastic_test
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false      # should turn off security warning
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - 9200:9200
+    networks:
+      - test_network
+
+
+  redis:
+    container_name: redis_cache_test
+    image: redis:6.2.6
+    restart: always
+    networks:
+      - test_network
+    ports:
+      - 6379:6379
+
+
+  api:
+    container_name: api_test
+    build:
+      context: ../../.
+      dockerfile: Dockerfile
+    image: api_image:latest
+    pull_policy: never
+    restart: always
+    networks:
+      - test_network
+    ports:
+      - 8000:8000
+    depends_on:
+      - elastic
+      - redis
+    env_file:
+      - ./test.env
+    command: ["./wait-for-it.sh", "elastic:9200", "--timeout=30", "--", "python", "main.py"]
+
+
+  tests:
+    container_name: tests
+    image: api_image:latest
+    pull_policy: never
+    restart: "no"
+    networks:
+      - test_network
+    depends_on:
+      - elastic
+      - redis
+      - api
+    env_file:
+      - ./test.env
+    command: >
+      sh -c "pip install -r /tests/functional/requirements.txt
+      && python3 /tests/functional/utils/wait_for_es.py
+      && python3 /tests/functional/utils/wait_for_redis.py
+      && pytest /tests/functional/src/ -v --suppress-tests-failed-exit-code >> results.txt
+      && cat results.txt"
+
+networks:
+  test_network:
+    driver: bridge
+    name: test_network

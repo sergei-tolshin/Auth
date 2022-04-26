@@ -1,0 +1,27 @@
+Список пользователей
+---
+tags:
+  - rbac
+security:
+  - Bearer: []
+responses:
+  200:
+    description: Success
+    schema:
+      type: array
+      items:
+        $ref: '#/definitions/User'
+  401:
+    description: Missing Authorization Header
+  422:
+    description: Signature verification failed
+definitions:
+  User:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      email:
+        type: string
+        format: email

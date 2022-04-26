@@ -1,0 +1,40 @@
+Аккаунт пользователя
+---
+tags:
+  - account
+security:
+  - Bearer: []
+responses:
+  200:
+    description: Profile info
+    schema:
+      $ref: "#/definitions/UserDetails"
+  401:
+    description: Missing Authorization Header
+  422:
+    description: Signature verification failed
+definitions:
+  UserDetails:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      email:
+        type: string
+        format: email
+      full_name:
+        type: string
+      birth_date:
+        type: string
+        format: date
+        example: '01.01.2000'
+      phone:
+        type: string
+      roles:
+        type: array
+        items:
+          type: string
+      date_joined:
+        type: string
+        format: date-time

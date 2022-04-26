@@ -1,0 +1,13 @@
+Проверка валидности токена
+---
+tags:
+  - auth
+security:
+  - Bearer: []
+responses:
+  200:
+    description: The token has been verified
+  401:
+    description: Missing Authorization Header
+  422:
+    description: Signature verification failed

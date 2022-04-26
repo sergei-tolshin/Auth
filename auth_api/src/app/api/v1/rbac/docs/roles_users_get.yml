@@ -1,0 +1,35 @@
+Пользователи с ролью
+---
+tags:
+  - rbac
+parameters:
+  - name: role_id
+    in: path
+    required: true
+    type: string
+    format: uuid
+security:
+  - Bearer: []
+responses:
+  200:
+    description: Success
+    schema:
+      type: array
+      items:
+        $ref: '#/definitions/RolesUsers'
+  401:
+    description: Missing Authorization Header
+  404:
+    description: Role not found
+  422:
+    description: Signature verification failed
+definitions:
+  RolesUsers:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      email:
+        type: string
+        format: email

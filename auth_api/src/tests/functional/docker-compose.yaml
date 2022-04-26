@@ -1,0 +1,53 @@
+version: '3.8'
+services:
+
+  redis:
+    container_name: redis_auth_test
+    image: redis:6.2.6
+    restart: always
+    ports:
+      - 6379:6379
+    networks:
+      - test_network
+
+  pg_db:
+    container_name: pg_auth_test
+    image: postgres:13
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - ./deploy/db:/docker-entrypoint-initdb.d
+    env_file:
+      - ./test.env
+    networks:
+      - test_network
+
+  auth_api:
+    container_name: auth_api_test
+    build:
+      context: ../../../.
+      dockerfile: Dockerfile
+    image: auth_api:latest
+    pull_policy: never
+    restart: "no"
+    ports:
+      - 5000:5000
+    depends_on:
+      - pg_db
+      - redis
+    env_file:
+      - ./test.env
+    networks:
+      - test_network
+    command: >
+      sh -c "./wait-for-it.sh pg_db:5432 -- echo 'postgres connected';
+      flask db upgrade;
+      pip install -r /auth_api/tests/functional/requirements.txt;
+      pytest /auth_api/tests/functional/src/ -v --suppress-tests-failed-exit-code >> results.txt;
+      cat results.txt"
+
+networks:
+  test_network:
+    driver: bridge
+    name: test_network

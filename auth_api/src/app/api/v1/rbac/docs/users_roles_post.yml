@@ -1,0 +1,31 @@
+Добавить пользователю роль
+---
+tags:
+  - rbac
+parameters:
+  - in: path
+    name: user_id
+    required: true
+    type: string
+    format: uuid
+  - in: body
+    name: body
+    required: true
+    schema:
+      properties:
+        roles:
+          type: array
+          items:
+            type: string
+            format: uuid
+security:
+  - Bearer: []
+responses:
+  200:
+    description: Role added to user
+  401:
+    description: Missing Authorization Header
+  404:
+    description: User not found
+  422:
+    description: Signature verification failed

@@ -1,0 +1,33 @@
+История событий (действия пользователя)
+---
+tags:
+  - account
+security:
+  - Bearer: []
+responses:
+  200:
+    description: Success
+    schema:
+      type: array
+      items:
+        $ref: '#/definitions/Event'
+  401:
+    description: Missing Authorization Header
+  422:
+    description: Signature verification failed
+definitions:
+  Event:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      action:
+        type: string
+      ip:
+        type: string
+      user_agent:
+        type: string
+      created:
+        type: string
+        format: date-time

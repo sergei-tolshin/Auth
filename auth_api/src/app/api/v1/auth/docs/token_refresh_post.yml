@@ -1,0 +1,28 @@
+Выдача новой пары токенов в обмен на корректный refresh токен
+---
+tags:
+  - auth
+parameters:
+  - in: body
+    name: body
+    schema:
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+          description: Токен обновления
+security: []
+responses:
+  200:
+    description: Success
+    schema:
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+  401:
+    description: Missing Authorization Header
+  422:
+    description: Signature verification failed

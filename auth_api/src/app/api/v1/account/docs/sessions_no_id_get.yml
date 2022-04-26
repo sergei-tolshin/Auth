@@ -1,0 +1,31 @@
+Список сеансов
+---
+tags:
+  - account
+security:
+  - Bearer: []
+responses:
+  200:
+    description: Success
+    schema:
+      type: array
+      items:
+        $ref: '#/definitions/Session'
+  401:
+    description: Missing Authorization Header
+  422:
+    description: Signature verification failed
+definitions:
+  Session:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      ip:
+        type: string
+      user_agent:
+        type: string
+      last_activity:
+        type: string
+        format: date-time

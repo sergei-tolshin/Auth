@@ -1,0 +1,27 @@
+Изменить роль
+---
+tags:
+  - rbac
+parameters:
+  - in: body
+    name: body
+    schema:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    required: true
+security:
+  - Bearer: []
+responses:
+  200:
+    description: Role changed
+  401:
+    description: Missing Authorization Header
+  422:
+    description: Signature verification failed
+  422:
+    description: The role name already exists

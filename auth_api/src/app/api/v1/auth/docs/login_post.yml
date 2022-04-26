@@ -1,0 +1,33 @@
+Вход пользователя в аккаунт
+---
+tags:
+  - auth
+parameters:
+  - in: body
+    name: body
+    schema:
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: Адрес электронной почты
+        password:
+          type: string
+          format: password
+          description: Пароль
+          example: Qwerty123!
+security: []
+responses:
+  200:
+    description: Success
+    schema:
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+  401:
+    description: Invalid email or password

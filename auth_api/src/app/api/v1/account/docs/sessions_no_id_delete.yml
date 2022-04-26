@@ -1,0 +1,13 @@
+Завершить все сеансы кроме текущего
+---
+tags:
+  - account
+security:
+  - Bearer: []
+responses:
+  204:
+    description: Sessions deleted
+  401:
+    description: Missing Authorization Header
+  422:
+    description: Signature verification failed

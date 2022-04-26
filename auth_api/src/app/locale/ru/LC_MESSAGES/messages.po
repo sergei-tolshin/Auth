@@ -1,0 +1,155 @@
+# Russian translations for PROJECT.
+# Copyright (C) 2022 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2022-04-21 08:22+0500\n"
+"PO-Revision-Date: 2022-04-21 08:25+0500\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ru\n"
+"Language-Team: ru <LL@li.org>\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: app/api/v1/account/views.py:69
+msgid "Profile updated"
+msgstr "Профиль обновлен"
+
+#: app/api/v1/account/views.py:91
+msgid "Invalid current email"
+msgstr "Неверный текущий адрес электронной почты"
+
+#: app/api/v1/account/views.py:101
+msgid "Email changed successfully"
+msgstr "Электронная почта успешно изменена"
+
+#: app/api/v1/account/views.py:123
+msgid "Invalid current password"
+msgstr "Неверный текущий пароль"
+
+#: app/api/v1/account/views.py:133
+msgid "Password changed successfully"
+msgstr "Пароль успешно изменен"
+
+#: app/api/v1/account/views.py:162
+msgid "Session not found"
+msgstr "Сеанс не найден"
+
+#: app/api/v1/account/views.py:170
+msgid "All sessions are closed"
+msgstr "Все сеансы, кроме текущего, завершены"
+
+#: app/api/v1/account/views.py:173
+#, python-format
+msgid "Session %(id)s is closed"
+msgstr "Сеанс %(id)s завершен"
+
+#: app/api/v1/auth/views.py:31
+msgid "Invalid email or password"
+msgstr "Неверный адрес электронной почты или пароль"
+
+#: app/api/v1/auth/views.py:53
+msgid "Access token revoked, session closed"
+msgstr "Токен доступа отозван, сеанс закрыт"
+
+#: app/api/v1/auth/views.py:80
+msgid "The token has been verified"
+msgstr "Токен подтвержден"
+
+#: app/api/v1/rbac/views.py:41 app/api/v1/rbac/views.py:73
+#: app/api/v1/rbac/views.py:96 app/api/v1/rbac/views.py:104
+#: app/api/v1/rbac/views.py:123
+msgid "Role not found"
+msgstr "Роль не найдена"
+
+#: app/api/v1/rbac/views.py:58
+msgid "Role created"
+msgstr "Роль создана"
+
+#: app/api/v1/rbac/views.py:77
+msgid "Role changed"
+msgstr "Роль изменена"
+
+#: app/api/v1/rbac/views.py:84
+msgid "Role deleted"
+msgstr "Роль удалена"
+
+#: app/api/v1/rbac/views.py:116
+#, python-format
+msgid "Role \"%(name)s\" added to users"
+msgstr "Роль \"%(name)s\" добавлена пользователям"
+
+#: app/api/v1/rbac/views.py:135
+#, python-format
+msgid "Role \"%(name)s\" removed from users"
+msgstr "Роль \"%(name)s\" отозвана у пользователей"
+
+#: app/api/v1/rbac/views.py:148 app/api/v1/rbac/views.py:156
+#: app/api/v1/rbac/views.py:174
+msgid "User not found"
+msgstr "Пользователь не найден"
+
+#: app/api/v1/rbac/views.py:168
+msgid "Role added to user"
+msgstr "Роль добавлена пользователю"
+
+#: app/api/v1/rbac/views.py:186
+msgid "Roles removed from user"
+msgstr "Роль отозвана у пользователя"
+
+#: app/core/decorators.py:16
+msgid "Superuser only!"
+msgstr "Только для суперпользователя!"
+
+#: app/core/decorators.py:32 app/core/decorators.py:49
+msgid "Insufficient permissions"
+msgstr "Недостаточно разрешений"
+
+#: app/core/errors.py:9
+msgid "Unknown error"
+msgstr "Неизвестная ошибка"
+
+#: app/models/journal.py:13
+msgid "Login"
+msgstr "Вход"
+
+#: app/models/journal.py:14
+msgid "Logout"
+msgstr "Выход"
+
+#: app/models/journal.py:15
+msgid "Change email"
+msgstr "Изменение адреса электронной почты"
+
+#: app/models/journal.py:16
+msgid "Change password"
+msgstr "Изменение пароля"
+
+#: app/models/journal.py:17
+msgid "Password recovery"
+msgstr "Восстановление пароля"
+
+#: app/schemas/rbac.py:18 app/schemas/validators.py:18
+msgid "The role name already exists."
+msgstr "Имя роли уже существует"
+
+#: app/schemas/validators.py:12
+msgid "The email address already exists."
+msgstr "Адрес электронной почты уже существует"
+
+#: app/schemas/validators.py:23
+msgid "Make sure your password is at lest 8 letters."
+msgstr "Убедитесь, что ваш пароль состоит как минимум из 8 символов"
+
+#: app/schemas/validators.py:33
+msgid "The password must not contain spaces."
+msgstr "Пароль не должен содержать пробелов"
+

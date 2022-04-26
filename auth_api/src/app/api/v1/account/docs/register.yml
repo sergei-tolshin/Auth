@@ -1,0 +1,34 @@
+Регистрация пользователя
+---
+tags:
+  - account
+parameters:
+  - in: body
+    name: body
+    schema:
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: Адрес электронной почты
+        password:
+          type: string
+          format: password
+          description: Пароль
+          example: Qwerty123!
+    required: true
+responses:
+  201:
+    description: Created
+    schema:
+      properties:
+        id:
+          type: string
+          format: uuid
+  400:
+    description: The email address already exists
+  422:
+    description: Invalid password
