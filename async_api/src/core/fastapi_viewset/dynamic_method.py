@@ -1,7 +1,6 @@
 from core import config
 from core.fastapi_viewset.schemas import Paginator
 from fastapi import Depends, Path, Request
-
 from .schemas import SearchQuery
 
 
@@ -28,8 +27,9 @@ class MethodFactory:
             sort: sort = Depends(),
             paginator: Paginator = Depends(),
         ):
+            permissions = request.auth.scopes
             params = dict(request.query_params)
-            query = await cls.get_query(params)
+            query = await cls.get_query(permissions, params)
             count = await cls.count(query)
             data = [hit['_source'] for hit in query['hits']['hits']]
             total, next, previous = await cls.get_pages(
@@ -48,8 +48,9 @@ class MethodFactory:
             query: SearchQuery = Depends(),
             paginator: Paginator = Depends(),
         ):
+            permissions = request.auth.scopes
             params = dict(request.query_params)
-            query = await cls.get_query(params)
+            query = await cls.get_query(permissions, params)
             count = await cls.count(query)
             data = [hit['_source'] for hit in query['hits']['hits']]
             total, next, previous = await cls.get_pages(
@@ -68,10 +69,11 @@ class MethodFactory:
                 paginator: Paginator = Depends(),
         ):
             entity = await cls.retrieve_function(cls.model, id=param)
+            permissions = request.auth.scopes
             params = dict(request.query_params)
             params['_index'] = config.ELASTIC_INDEX[index]
             params['body'] = {'query': {'ids': {'values': entity['film_ids']}}}
-            query = await cls.get_query(params)
+            query = await cls.get_query(permissions, params)
             count = await cls.count(query)
             data = [hit['_source'] for hit in query['hits']['hits']]
             total, next, previous = await cls.get_pages(

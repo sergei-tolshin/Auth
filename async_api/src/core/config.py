@@ -37,3 +37,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Локализация
 LANGUAGE = os.getenv('LANGUAGE', 'ru')
 LOCALE_PATH = os.getenv('LOCALE_PATH', 'locale')
+
+# Сервис авторизации
+AUTH_URL = os.getenv('AUTH_URL', 'http://127.0.0.1:5000')
+JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'secret_key')
+JWT_ALGORITHM: str = os.getenv('JWT_ALGORITHM', 'HS256')

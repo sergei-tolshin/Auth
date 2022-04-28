@@ -7,6 +7,8 @@ from fastapi.responses import ORJSONResponse
 from api.v1 import films, genres, persons
 from core import config, logger
 from db import cache, elastic, redis, storage
+from core.middleware import AuthMiddleware
+
 
 app = FastAPI(
     title='Read-only API для онлайн-кинотеатра',
@@ -18,6 +20,11 @@ app = FastAPI(
     redoc_url='/api/redoc',
     default_response_class=ORJSONResponse,
 )
+
+app.add_middleware(AuthMiddleware,
+                   secret_key=config.JWT_SECRET_KEY,
+                   algorithms=config.JWT_ALGORITHM,
+                   auth_url=f'{config.AUTH_URL}/api/v1/auth/token/verify/')
 
 
 @app.on_event('startup')

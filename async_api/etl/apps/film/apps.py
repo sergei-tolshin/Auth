@@ -71,6 +71,7 @@ class FilmApps(BaseApps):
                         title = film.get('title')
                         description = film.get('description')
                         film_type = film.get('type')
+                        permissions = film.get('permissions')
                         genre_name = film.get('genre')
                         genre_instance = {'id': film.get('genre_id'),
                                           'name': genre_name}
@@ -100,6 +101,7 @@ class FilmApps(BaseApps):
                             'title': title,
                             'description': description,
                             'film_type': film_type,
+                            'permissions': permissions,
                             'genre': genres,
                             'directors_names': directors_names,
                             'actors_names': actors_names,

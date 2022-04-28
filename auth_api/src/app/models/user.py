@@ -61,13 +61,22 @@ class User(db.Model, BaseMixin, UserMixin):
         set_token(refresh_token)
         access_token = create_access_token(
             identity=self,
-            additional_claims={'rti': get_jti(refresh_token)}
+            additional_claims={
+                'name': self.full_name,
+                'rti': get_jti(refresh_token)
+                }
         )
         token_pair = {
             'access_token': access_token,
             'refresh_token': refresh_token
         }
         return token_pair
+
+    @property
+    def full_name(self):
+        profile = self.profile
+        full_name = '%s %s' % (profile.first_name, profile.last_name)
+        return full_name.strip().title()
 
     def add_roles(self, role_ids):
         roles = Role.query.filter(Role.id.in_(role_ids)).all()

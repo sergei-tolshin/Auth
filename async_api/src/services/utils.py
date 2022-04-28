@@ -5,6 +5,7 @@ from core import config
 
 class RequestParams:
     async def get_query(self,
+                        permissions: List,
                         params: dict,
                         index: str,
                         search_fields: Optional[List] = None,
@@ -23,7 +24,31 @@ class RequestParams:
             _index = index
 
         if not body:
-            body: dict = {'query': {'match_all': {}}}
+            body: dict = {
+                'query': {
+                    'bool': {
+                        # 'must_not': {
+                        #     'exists': {
+                        #         'field': 'permissions'
+                        #     }
+                        # }
+                        'must': [
+                            {
+                                'match': {
+                                    'permissions': {
+                                        'query': ','.join(permissions),
+                                        'fuzziness': 'auto',
+                                        'operator': 'and'
+                                    }
+                                }
+                            },
+                            {
+                                'match_all': {}
+                            }
+                        ]
+                    }
+                }
+            }
 
         if filter_genre:
             body = {
