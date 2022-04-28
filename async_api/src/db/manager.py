@@ -36,7 +36,6 @@ class DataManager:
     async def search(cls, **query):
         storage = await get_storage()
         cache = await get_cache()
-        print(query)
         key = await cache.get_key(cls.index, query)
         queryset = await cache.get(key) or None
         if not queryset:

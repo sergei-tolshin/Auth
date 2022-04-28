@@ -18,7 +18,7 @@ class AbstractService(ABC):
         raise NotImplementedError
 
     @abstractclassmethod
-    async def get_query(self, params):
+    async def get_query(self, permissions, params):
         pass
 
 
@@ -26,8 +26,8 @@ class BaseService(AbstractService):
     search_fields: Optional[List] = []
 
     @classmethod
-    async def get_query(cls, params):
+    async def get_query(cls, permissions, params):
         request_params = RequestParams()
-        query = await request_params.get_query(params, cls.index,
+        query = await request_params.get_query(permissions, params, cls.index,
                                                cls.search_fields)
         return query

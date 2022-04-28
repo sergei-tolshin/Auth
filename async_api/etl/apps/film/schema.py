@@ -91,7 +91,12 @@ SCHEMA = {
                         'analyzer': 'ru_en'
                     }
                 }
-            }
+            },
+            'permissions': {
+                'type': 'text',
+                'analyzer': 'ru_en',
+                'null_value': 'NULL'
+            },
         }
     }
 }

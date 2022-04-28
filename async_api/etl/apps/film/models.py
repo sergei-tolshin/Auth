@@ -20,6 +20,7 @@ class FilmBaseManager(BaseManager):
                 fw.description,
                 fw.rating,
                 fw.type,
+                fw.permissions,
                 fw.created,
                 fw.modified,
                 pfw.role,
@@ -48,6 +49,7 @@ class FilmInstanceModel(UUIDMixin):
     title: str
     description: Optional[str] = None
     film_type: Optional[str] = None
+    permissions: Optional[str] = None
     genre: Optional[List[GenreInstanceModel]] = None
     directors_names: Optional[List[str]] = None
     actors_names: Optional[List[str]] = None

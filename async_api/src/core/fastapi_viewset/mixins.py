@@ -41,8 +41,8 @@ class BaseViewMixin(BaseMixin, metaclass=ViewSetMeta):
     model = None
 
     @classmethod
-    async def get_query(cls, params):
-        query = await cls.model.get_query(params)
+    async def get_query(cls, permissions, params):
+        query = await cls.model.get_query(permissions, params)
         return await cls.model.search(**query)
 
     @classmethod
