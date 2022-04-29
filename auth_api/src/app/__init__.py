@@ -2,14 +2,19 @@ from flasgger import Swagger
 from flask import Flask
 from flask_babel import Babel
 from flask_jwt_extended import JWTManager
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from flask_security import Security
 from flask_sqlalchemy import SQLAlchemy
 
 from app.core.config import DevelopmentConfig
+from app.core.middleware import RateLimiter
 from app.db.redis import Redis
 
+limiter = Limiter(key_func=get_remote_address)
+rate_limiter = RateLimiter(limit='1/second')
 db = SQLAlchemy()
 migrate = Migrate()
 cache = Redis()
@@ -42,5 +47,13 @@ def create_app(config_class=DevelopmentConfig):
     app.register_blueprint(create)
     app.register_blueprint(core)
     app.register_blueprint(api)
+
+    """
+    Для ограничения количества запросов к серверу (Rate limit) подключено
+    расширение Flask-Limiter, но для задания спринта реализован алгоритм
+    Token bucket с использованием Redis
+    """
+    # limiter.init_app(app)
+    rate_limiter.init_app(app)
 
     return app

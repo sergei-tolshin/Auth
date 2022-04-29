@@ -29,6 +29,11 @@ def method_not_allowed(error):
     return error_response(error.code, error.description)
 
 
+@core.app_errorhandler(429)
+def ratelimit_handler(error):
+    return error_response(error.code, error.description)
+
+
 @core.app_errorhandler(500)
 def internal_error(error):
     return error_response(error.code, error.description)

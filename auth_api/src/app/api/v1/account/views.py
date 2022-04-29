@@ -1,5 +1,6 @@
 from http import HTTPStatus
 
+from app import limiter
 from app.core.errors import error_response
 from app.db.cache import delete_session, get_session
 from app.models.journal import Action, Journal
@@ -15,6 +16,8 @@ from marshmallow import ValidationError
 
 
 class RegisterAPI(SwaggerView):
+    decorators = [limiter.limit('5/minute')]
+
     @swag_from('docs/register.yml')
     def post(self):
         """Регистрация пользователя"""
