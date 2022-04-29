@@ -1,5 +1,6 @@
 from http import HTTPStatus
 
+from app import limiter
 from app.core.errors import error_response
 from app.db.cache import delete_token, revoke_token
 from app.models.journal import Action, Journal
@@ -13,6 +14,8 @@ from marshmallow import ValidationError
 
 
 class LoginAPI(SwaggerView):
+    decorators = [limiter.limit('5/minute')]
+
     @swag_from('docs/login_post.yml')
     def post(self):
         """Вход пользователя в аккаунт"""
@@ -53,6 +56,8 @@ class LogoutAPI(SwaggerView):
 
 
 class TokenRefreshAPI(SwaggerView):
+    decorators = [limiter.limit('5/minute')]
+
     @jwt_required(refresh=True, locations='json')
     @swag_from('docs/token_refresh_post.yml')
     def post(self):

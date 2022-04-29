@@ -22,6 +22,13 @@ class BaseConfig(object):
 
     JSON_SORT_KEYS = False
 
+    RATELIMIT_ENABLED = True
+    RATELIMIT_STRATEGY = 'moving-window'
+    RATELIMIT_DEFAULT = '1/second'
+    RATELIMIT_STORAGE_URI = os.getenv(
+        'RATELIMIT_STORAGE_URI',
+        'redis://127.0.0.1:6379')
+
     SWAGGER = {
         'swagger': '2.0',
         'info': {
