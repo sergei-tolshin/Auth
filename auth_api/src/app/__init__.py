@@ -11,10 +11,12 @@ from flask_sqlalchemy import SQLAlchemy
 
 from app.core.config import DevelopmentConfig
 from app.core.middleware import RateLimiter
+from app.core.tracer import Tracer
 from app.db.redis import Redis
 
 limiter = Limiter(key_func=get_remote_address)
 rate_limiter = RateLimiter(limit='1/second')
+tracer = Tracer()
 db = SQLAlchemy()
 migrate = Migrate()
 cache = Redis()
@@ -29,6 +31,7 @@ def create_app(config_class=DevelopmentConfig):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    tracer.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
     cache.init_app(app)
