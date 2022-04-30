@@ -15,8 +15,8 @@ from app.core.tracer import Tracer
 from app.db.redis import Redis
 
 limiter = Limiter(key_func=get_remote_address)
-rate_limiter = RateLimiter(limit='1/second')
-tracer = Tracer()
+rate_limiter = RateLimiter(limit='10/second')
+tracer = Tracer(console=False)
 db = SQLAlchemy()
 migrate = Migrate()
 cache = Redis()

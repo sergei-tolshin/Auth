@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 from .views import (AccountAPI, ChangeEmailAPI, ChangePasswordAPI, JournalAPI,
-                    RegisterAPI, SessionsAPI)
+                    RegisterAPI, SessionsAPI, TOTPDeviceAPI)
 
 router = Blueprint('account', __name__, url_prefix='/account')
 
@@ -32,3 +32,7 @@ router.add_url_rule('/sessions/<session_id>',
                     view_func=SessionsAPI.as_view('sessions'),
                     endpoint='with_id',
                     methods=['GET', 'DELETE'])
+
+router.add_url_rule('/otp/',
+                    view_func=TOTPDeviceAPI.as_view('otp'),
+                    methods=['GET', 'POST', 'DELETE'])

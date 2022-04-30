@@ -1,0 +1,26 @@
+Отключение двухфакторной аутентификации
+---
+tags:
+  - account
+parameters:
+  - in: body
+    name: body
+    schema:
+      required:
+      - code
+      properties:
+        code:
+          type: integer
+          description: Код подтверждения
+    required: true
+security:
+  - Bearer: []
+responses:
+  204:
+    description: Two-factor authentication is disabled
+  401:
+    description: Missing Authorization Header
+  403:
+    description: Two-factor authentication is already disabled
+  422:
+    description: Signature verification failed

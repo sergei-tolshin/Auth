@@ -1,13 +1,15 @@
 from http import HTTPStatus
 
+import pyotp
 from app import limiter
 from app.core.errors import error_response
 from app.db.cache import delete_session, get_session
 from app.models.journal import Action, Journal
-from app.models.user import User
+from app.models.user import TOTPDevice, User
 from app.schemas.journal import JournalSchema, SessionSchema
 from app.schemas.user import (ChangeEmailSchema, ChangePasswordSchema,
-                              ProfileSchema, RegisterSchema, UserSchema)
+                              CodeSchema, ProfileSchema, RegisterSchema,
+                              UserSchema)
 from flasgger import SwaggerView, swag_from
 from flask import abort, jsonify, request
 from flask_babel import _
@@ -43,7 +45,7 @@ class AccountAPI(SwaggerView):
         """Аккаунт пользователя"""
         schema = UserSchema()
         identity = get_jwt_identity()
-        user = User.find_by_id(identity)
+        user = User.query.get_or_404(identity, _('User not found'))
         return jsonify(schema.dump(user)), HTTPStatus.OK
 
     @jwt_required()
@@ -59,7 +61,7 @@ class AccountAPI(SwaggerView):
                                   err.messages)
 
         identity = get_jwt_identity()
-        user = User.find_by_id(identity)
+        user = User.query.get_or_404(identity, _('User not found'))
         user.profile.update(data)
         user.save()
 
@@ -80,7 +82,7 @@ class ChangeEmailAPI(SwaggerView):
                                   err.messages)
 
         identity = get_jwt_identity()
-        user = User.find_by_id(identity)
+        user = User.query.get_or_404(identity, _('User not found'))
 
         if user.email != data.get('current_email'):
             abort(HTTPStatus.NOT_FOUND, description=_('Invalid current email'))
@@ -110,7 +112,7 @@ class ChangePasswordAPI(SwaggerView):
                                   err.messages)
 
         identity = get_jwt_identity()
-        user = User.find_by_id(identity)
+        user = User.query.get_or_404(identity, _('User not found'))
 
         if not user.check_password(data.get('current_password')):
             abort(HTTPStatus.NOT_FOUND,
@@ -169,3 +171,86 @@ class SessionsAPI(SwaggerView):
             delete_session(get_jwt(), session_id)
             return jsonify(msg=_('Session %(id)s is closed',
                                  id=session_id)), HTTPStatus.NO_CONTENT
+
+
+class TOTPDeviceAPI(SwaggerView):
+    @jwt_required()
+    @swag_from('docs/totp_get.yml')
+    def get(self):
+        """Включение двухфакторной аутентификации"""
+        identity = get_jwt_identity()
+        user = User.query.get_or_404(identity, _('User not found'))
+
+        if user.totp and user.totp.confirmed:
+            return error_response(
+                HTTPStatus.FORBIDDEN,
+                _('Two-factor authentication is already enabled'))
+
+        key = pyotp.random_base32()
+        user.totp = TOTPDevice(key=key)
+        user.save()
+        totp = pyotp.TOTP(key)
+        provisioning_url = totp.provisioning_uri(name=user.email,
+                                                 issuer_name='Movies')
+
+        return jsonify(url=provisioning_url), HTTPStatus.OK
+
+    @jwt_required()
+    @swag_from('docs/totp_post.yml')
+    def post(self):
+        """Подтверждение включения двухфакторной аутентификации"""
+        schema = CodeSchema()
+        data = request.get_json()
+
+        try:
+            data = schema.load(data)
+        except ValidationError as err:
+            return error_response(HTTPStatus.UNPROCESSABLE_ENTITY,
+                                  err.messages)
+
+        identity = get_jwt_identity()
+        user = User.query.get_or_404(identity, _('User not found'))
+        if user.totp and user.totp.confirmed:
+            return error_response(
+                HTTPStatus.FORBIDDEN,
+                _('Two-factor authentication is already enabled'))
+
+        totp = pyotp.TOTP(user.totp.key)
+        if not totp.verify(data.get('code')):
+            return error_response(HTTPStatus.UNAUTHORIZED, _('Invalid code'))
+
+        user.totp.confirmed = True
+        user.save()
+
+        return jsonify(msg=_('Two-factor authentication is enabled')), \
+            HTTPStatus.CREATED
+
+    @jwt_required()
+    @swag_from('docs/totp_delete.yml')
+    def delete(self):
+        """Отключение двухфакторной аутентификации"""
+        schema = CodeSchema()
+        data = request.get_json()
+
+        try:
+            data = schema.load(data)
+        except ValidationError as err:
+            return error_response(HTTPStatus.UNPROCESSABLE_ENTITY,
+                                  err.messages)
+
+        identity = get_jwt_identity()
+        user = User.query.get_or_404(identity, _('User not found'))
+
+        if not user.totp:
+            return error_response(
+                HTTPStatus.FORBIDDEN,
+                _('Two-factor authentication is already disabled'))
+
+        totp = pyotp.TOTP(user.totp.key)
+
+        if not totp.verify(data.get('code')):
+            return error_response(HTTPStatus.UNAUTHORIZED, _('Invalid code'))
+
+        user.totp.delete()
+        return jsonify(msg=_('Two-factor authentication is disabled')), \
+            HTTPStatus.NO_CONTENT

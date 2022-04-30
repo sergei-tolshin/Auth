@@ -20,6 +20,7 @@ opentelemetry-sdk==1.11.1
 orjson==3.6.8
 phonenumbers==8.12.46
 psycopg2-binary==2.9.3
+pyotp==2.6.0
 redis==4.2.2
 SQLAlchemy==1.4.35
 user-agents==2.2.0

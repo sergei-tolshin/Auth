@@ -17,7 +17,7 @@ router.add_url_rule('/roles/',
                     methods=['GET'])
 router.add_url_rule('/roles/',
                     view_func=roles_view,
-                    methods=['POST', ])
+                    methods=['POST'])
 router.add_url_rule('/roles/<uuid:role_id>',
                     view_func=roles_view,
                     endpoint='with_role_id',

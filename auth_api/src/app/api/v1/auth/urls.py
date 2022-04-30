@@ -1,6 +1,7 @@
 from flask import Blueprint
 
-from .views import LoginAPI, LogoutAPI, TokenRefreshAPI, TokenVerifyAPI
+from .views import (CheckAPI, LoginAPI, LogoutAPI, TokenRefreshAPI,
+                    TokenVerifyAPI)
 
 router = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -12,3 +13,5 @@ router.add_url_rule('/token/refresh/',
                     view_func=TokenRefreshAPI.as_view('token_refresh'))
 router.add_url_rule('/token/verify/',
                     view_func=TokenVerifyAPI.as_view('token_verify'))
+router.add_url_rule('/check/<uuid:user_id>',
+                    view_func=CheckAPI.as_view('check'))

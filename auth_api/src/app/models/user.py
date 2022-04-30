@@ -1,3 +1,4 @@
+from email.policy import default
 import uuid
 from datetime import datetime
 
@@ -31,6 +32,7 @@ class User(db.Model, BaseMixin, UserMixin):
     roles = db.relationship(Role, secondary='auth.roles_users',
                             backref=db.backref('users', lazy='dynamic'))
     events = db.relationship(Journal, backref='user')
+    totp = db.relationship('TOTPDevice', back_populates='user', uselist=False)
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
@@ -117,6 +119,21 @@ class Profile(db.Model, BaseMixin):
 
     def __repr__(self):
         return f'<Profile {self.first_name} {self.last_name}>'
+
+
+class TOTPDevice(db.Model, BaseMixin):
+    __tablename__ = 'totp_device'
+    __table_args__ = {'schema': 'auth'}
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4,
+                   unique=True, nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('auth.users.id'))
+    confirmed = db.Column(db.Boolean, default=False)
+    key = db.Column(db.String, nullable=False)
+    digits = db.Column(db.Integer, nullable=False, default=6)
+    interval = db.Column(db.Integer, nullable=False, default=30)
+
+    user = db.relationship(User, back_populates='totp')
 
 
 @event.listens_for(User, 'after_insert')

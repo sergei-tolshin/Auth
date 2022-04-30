@@ -80,3 +80,7 @@ class ChangeEmailSchema(ma.Schema):
     current_email = fields.Email(load_only=True)
     new_email = fields.Email(validate=validate_email, load_only=True)
     logout_everywhere = fields.Boolean(default=True)
+
+
+class CodeSchema(ma.Schema):
+    code = fields.Int()

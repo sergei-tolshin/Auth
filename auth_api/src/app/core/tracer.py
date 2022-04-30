@@ -12,10 +12,15 @@ from opentelemetry.sdk.trace.export import (BatchSpanProcessor,
 
 
 class Tracer:
-    def __init__(self, app: Optional[flask.Flask] = None,
-                 config_prefix='TRACER', console=True, **kwargs):
+    def __init__(self,
+                 app: Optional[flask.Flask] = None,
+                 config_prefix='TRACER',
+                 console=True,
+                 request_id=True,
+                 **kwargs):
         self.config_prefix = config_prefix
         self.console = console
+        self.request_id = request_id
 
         if app is not None:
             self.init_app(app)
@@ -27,7 +32,8 @@ class Tracer:
         if not hasattr(app, 'extensions'):
             app.extensions = {}
 
-        app.before_request(self._get_request_id)
+        if self.request_id:
+            app.before_request(self._get_request_id)
 
         app.extensions[self.config_prefix.lower()] = self
 

@@ -1,0 +1,23 @@
+Подтверждение включения двухфакторной аутентификации
+---
+tags:
+  - account
+parameters:
+  - in: body
+    name: body
+    schema:
+      required:
+        - code
+      properties:
+        code:
+          type: integer
+          description: Код подтверждения
+security:
+  - Bearer: []
+responses:
+  201:
+    description: Two-factor authentication is enabled
+  401:
+    description: Invalid code
+  403:
+    description: Two-factor authentication is already enabled
