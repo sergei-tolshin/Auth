@@ -29,6 +29,10 @@ class BaseConfig(object):
         'RATELIMIT_STORAGE_URI',
         'redis://127.0.0.1:6379')
 
+    TRACER_SERVICE_NAME = 'auth-api'
+    TRACER_JAEGER_HOST = os.getenv('TRACER_JAEGER_HOST', '127.0.0.1')
+    TRACER_JAEGER_PORT = int(os.getenv('TRACER_JAEGER_PORT', 6831))
+
     SWAGGER = {
         'swagger': '2.0',
         'info': {
