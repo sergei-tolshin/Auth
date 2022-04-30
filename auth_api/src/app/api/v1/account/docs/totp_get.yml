@@ -1,0 +1,23 @@
+Включение двухфакторной аутентификации
+---
+tags:
+  - account
+security:
+  - Bearer: []
+responses:
+  200:
+    description: URL
+    schema:
+      $ref: "#/definitions/URL"
+  401:
+    description: Missing Authorization Header
+  403:
+    description: Two-factor authentication is already enabled
+  422:
+    description: Signature verification failed
+definitions:
+  URL:
+    type: object
+    properties:
+      url:
+        type: string

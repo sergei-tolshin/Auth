@@ -1,0 +1,26 @@
+Перенаправление для двухфакторной аутентификации
+---
+tags:
+  - auth
+parameters:
+  - in: path
+    name: user_id
+    required: true
+    type: string
+    format: uuid
+responses:
+  200:
+    description: User ID
+    schema:
+      $ref: "#/definitions/UserID"
+  401:
+    description: Missing Authorization Header
+  422:
+    description: Signature verification failed
+definitions:
+  UserID:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
