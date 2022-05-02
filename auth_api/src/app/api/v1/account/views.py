@@ -1,6 +1,5 @@
 from http import HTTPStatus
 
-import pyotp
 from app import limiter
 from app.core.errors import error_response
 from app.db.cache import delete_session, get_session
@@ -185,13 +184,8 @@ class TOTPDeviceAPI(SwaggerView):
             return error_response(
                 HTTPStatus.FORBIDDEN,
                 _('Two-factor authentication is already enabled'))
-
-        key = pyotp.random_base32()
-        user.totp = TOTPDevice(key=key)
-        user.save()
-        totp = pyotp.TOTP(key)
-        provisioning_url = totp.provisioning_uri(name=user.email,
-                                                 issuer_name='Movies')
+        user.totp = TOTPDevice()
+        provisioning_url = user.totp.enabled()
 
         return jsonify(url=provisioning_url), HTTPStatus.OK
 
@@ -215,8 +209,7 @@ class TOTPDeviceAPI(SwaggerView):
                 HTTPStatus.FORBIDDEN,
                 _('Two-factor authentication is already enabled'))
 
-        totp = pyotp.TOTP(user.totp.key)
-        if not totp.verify(data.get('code')):
+        if not user.totp.verify(data.get('code')):
             return error_response(HTTPStatus.UNAUTHORIZED, _('Invalid code'))
 
         user.totp.confirmed = True
@@ -246,9 +239,7 @@ class TOTPDeviceAPI(SwaggerView):
                 HTTPStatus.FORBIDDEN,
                 _('Two-factor authentication is already disabled'))
 
-        totp = pyotp.TOTP(user.totp.key)
-
-        if not totp.verify(data.get('code')):
+        if not user.totp.verify(data.get('code')):
             return error_response(HTTPStatus.UNAUTHORIZED, _('Invalid code'))
 
         user.totp.delete()

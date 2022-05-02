@@ -1,7 +1,7 @@
-from email.policy import default
 import uuid
 from datetime import datetime
 
+import pyotp
 from app import db
 from app.db.cache import set_token
 from flask_jwt_extended import (create_access_token, create_refresh_token,
@@ -66,7 +66,7 @@ class User(db.Model, BaseMixin, UserMixin):
             additional_claims={
                 'name': self.full_name,
                 'rti': get_jti(refresh_token)
-                }
+            }
         )
         token_pair = {
             'access_token': access_token,
@@ -134,6 +134,18 @@ class TOTPDevice(db.Model, BaseMixin):
     interval = db.Column(db.Integer, nullable=False, default=30)
 
     user = db.relationship(User, back_populates='totp')
+
+    def enabled(self):
+        key = pyotp.random_base32()
+        self.key = key
+        self.save()
+        totp = pyotp.TOTP(key)
+        return totp.provisioning_uri(name=self.user.email,
+                                     issuer_name='Movies')
+
+    def verify(self, code):
+        totp = pyotp.TOTP(self.key, digits=self.digits, interval=self.interval)
+        return totp.verify(code)
 
 
 @event.listens_for(User, 'after_insert')

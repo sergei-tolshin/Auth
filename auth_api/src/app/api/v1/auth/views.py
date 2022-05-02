@@ -1,6 +1,5 @@
 from http import HTTPStatus
 
-import pyotp
 from app import limiter
 from app.core.errors import error_response
 from app.db.cache import delete_token, revoke_token
@@ -108,10 +107,8 @@ class CheckAPI(SwaggerView):
                                   err.messages)
 
         user = User.query.get_or_404(user_id, _('User not found'))
-        totp = pyotp.TOTP(user.totp.key)
-
-        if not totp.verify(data.get('code')):
-            abort(HTTPStatus.NOT_FOUND, description=_('Invalid code'))
+        if not user.totp.verify(data.get('code')):
+            return error_response(HTTPStatus.UNAUTHORIZED, _('Invalid code'))
 
         event = Journal(Action.login, request)
         user.events.append(event)
