@@ -2,40 +2,33 @@ import logging
 from http import HTTPStatus
 from typing import List, Tuple
 
-import aiohttp
+import grpc
 from aiobreaker import CircuitBreaker
 from fastapi import FastAPI
 from fastapi.requests import HTTPConnection
 from fastapi.responses import JSONResponse
-from jose import ExpiredSignatureError, jwt
+from jose import ExpiredSignatureError, JWTError, jwt
 from starlette.authentication import (AuthCredentials, AuthenticationBackend,
                                       BaseUser, UnauthenticatedUser)
 from starlette.types import Receive, Scope, Send
 
+from core.auth.user_pb2 import UserInfoRequest
+from core.auth.user_pb2_grpc import UserStub
+
+from .errors import (AuthConnectorError, AuthenticationHeaderMissing,
+                     UserNotActive, UserNotFound)
+
 auth_breaker = CircuitBreaker(fail_max=5)
 
 
-class AuthenticationHeaderMissing(Exception):
-    pass
-
-
-class TokenHasExpired(Exception):
-    pass
-
-
-class TokenNotVerification(Exception):
-    pass
-
-
-class AuthConnectorError(Exception):
-    pass
-
-
 class FastAPIUser(BaseUser):
-    def __init__(self, first_name: str, last_name: str, user_id: any):
+    def __init__(self, first_name: str, last_name: str, age: int,
+                 email: str, user_id: any):
+        self.user_id = user_id
+        self.email = email
         self.first_name = first_name
         self.last_name = last_name
-        self.user_id = user_id
+        self.age = age
 
     @property
     def is_authenticated(self) -> bool:
@@ -57,7 +50,7 @@ class AuthMiddleware:
         get_scopes: callable = None,
         get_user: callable = None,
         algorithms: str or List[str] = None,
-        auth_url: str = None
+        auth_channel: str = None,
     ):
         self.app = app
         self.backend: AuthBackend = AuthBackend(
@@ -65,7 +58,7 @@ class AuthMiddleware:
             get_scopes=get_scopes,
             get_user=get_user,
             algorithms=algorithms,
-            auth_url=auth_url
+            auth_channel=auth_channel,
         )
 
     async def __call__(
@@ -83,18 +76,20 @@ class AuthMiddleware:
         try:
             scope['auth'], scope['user'] = await self.backend.authenticate(conn)
             await self.app(scope, receive, send)
-        except (
-            AuthenticationHeaderMissing,
-            TokenNotVerification,
-            AuthConnectorError
-        ):
-            scope['auth'], scope['user'] = AuthCredentials(
-                scopes=[]), UnauthenticatedUser()
-            await self.app(scope, receive, send)
         except ExpiredSignatureError:
             response = self.token_has_expired()
             await response(scope, receive, send)
             return
+        except (
+            AuthConnectorError,
+            AuthenticationHeaderMissing,
+            JWTError,
+            UserNotActive,
+            UserNotFound
+        ):
+            scope['auth'], scope['user'] = AuthCredentials(scopes=[]), \
+                UnauthenticatedUser()
+            await self.app(scope, receive, send)
 
     @staticmethod
     def token_has_expired(*args, **kwargs):
@@ -109,11 +104,11 @@ class AuthBackend(AuthenticationBackend):
         get_scopes: callable,
         get_user: callable,
         algorithms: str or List[str],
-        auth_url
+        auth_channel
     ):
         self.secret_key = secret_key
         self.algorithms = algorithms
-        self.auth_url = auth_url
+        self.auth_channel = auth_channel
 
         if get_scopes is None:
             self.get_scopes = self._get_scopes
@@ -126,27 +121,26 @@ class AuthBackend(AuthenticationBackend):
             self.get_user = get_user
 
     @staticmethod
-    def _get_scopes(decoded_token: dict) -> List[str]:
+    def _get_scopes(roles: str) -> List[str]:
         try:
-            roles = decoded_token['roles']
-            if decoded_token['is_superuser']:
-                roles.append('superuser')
+            roles = roles.split(',')
             return roles
         except KeyError or AttributeError:
             return []
 
     @staticmethod
-    def _get_user(decoded_token: dict) -> FastAPIUser:
+    def _get_user(user) -> FastAPIUser:
         try:
-            name_segments = decoded_token.get('name').split(' ')
+            name_segments = user.name.split(' ')
             first_name, last_name = name_segments[0], name_segments[-1]
-
         except AttributeError:
             first_name, last_name = None, None
 
-        return FastAPIUser(user_id=decoded_token.get('sub'),
+        return FastAPIUser(user_id=user.id,
+                           email=user.email,
                            first_name=first_name,
-                           last_name=last_name)
+                           last_name=last_name,
+                           age=user.age)
 
     async def authenticate(
         self, conn: HTTPConnection
@@ -160,23 +154,26 @@ class AuthBackend(AuthenticationBackend):
                                    key=self.secret_key,
                                    algorithms=self.algorithms)
 
-        scopes = self.get_scopes(decoded_token)
-        user = self.get_user(decoded_token)
-
         try:
-            token_verify = await self.send_token_verify_request(
-                url=str(self.auth_url), headers=dict(conn.headers))
-        except aiohttp.ClientConnectorError:
-            raise AuthConnectorError
+            user_id = decoded_token.get('sub')
+            user_info = await self.get_user_info_request(user_id)
+        except grpc.RpcError as error:
+            if error.code() == grpc.StatusCode.NOT_FOUND:
+                raise UserNotFound
+            if error.code() == grpc.StatusCode.UNAUTHENTICATED:
+                raise UserNotActive
+            if error.code() == grpc.StatusCode.UNAVAILABLE:
+                logging.warning('Auth service is unavailable')
+                raise AuthConnectorError
 
-        if token_verify.status != HTTPStatus.OK:
-            raise TokenNotVerification
+        scopes = self.get_scopes(user_info.roles)
+        user = self.get_user(user_info)
 
         return AuthCredentials(scopes=scopes), user
 
     @auth_breaker
-    async def send_token_verify_request(self, url: str, headers: dict):
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, headers=headers) as response:
-                logging.info(response)
-                return response
+    async def get_user_info_request(self, id):
+        stub = UserStub(self.auth_channel)
+        response = await stub.GetInfo(UserInfoRequest(id=id))
+        logging.info(response)
+        return response

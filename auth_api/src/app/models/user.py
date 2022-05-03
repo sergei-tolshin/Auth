@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 import pyotp
 from app import db
@@ -79,6 +79,16 @@ class User(db.Model, BaseMixin, UserMixin):
         profile = self.profile
         full_name = '%s %s' % (profile.first_name, profile.last_name)
         return full_name.strip().title()
+
+    @property
+    def age(self):
+        if self.profile.birth_date:
+            birth_date = self.profile.birth_date
+            today = date.today()
+            age = today.year - birth_date.year
+            - ((today.month, today.day) < (birth_date.month, birth_date.day))
+            return age
+        return None
 
     def add_roles(self, role_ids):
         roles = Role.query.filter(Role.id.in_(role_ids)).all()

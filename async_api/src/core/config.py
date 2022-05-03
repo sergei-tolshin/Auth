@@ -39,6 +39,7 @@ LANGUAGE = os.getenv('LANGUAGE', 'ru')
 LOCALE_PATH = os.getenv('LOCALE_PATH', 'locale')
 
 # Сервис авторизации
-AUTH_URL = os.getenv('AUTH_URL', 'http://127.0.0.1:5000')
+AUTH_GRPC_HOST = os.getenv('AUTH_GRPC_HOST', '127.0.0.1')
+AUTH_GRPC_PORT = os.getenv('AUTH_GRPC_PORT', '50051')
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'secret_key')
 JWT_ALGORITHM: str = os.getenv('JWT_ALGORITHM', 'HS256')
