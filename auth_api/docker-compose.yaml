@@ -65,6 +65,20 @@ services:
       - ./.env
     command: ["flask", "db", "upgrade"]
 
+  grpc:
+    container_name: auth_grpc
+    build:
+        context: ./src/grpc
+        dockerfile: Dockerfile
+    image: grpc_api
+    ports:
+       - 50051:50051
+    depends_on:
+      - pg_db
+      - redis
+      - auth_api
+    env_file: ./.env
+
 volumes:
   pg_data:
     name: pg_auth_volume
