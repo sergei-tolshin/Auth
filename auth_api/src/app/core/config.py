@@ -22,6 +22,13 @@ class BaseConfig(object):
 
     JSON_SORT_KEYS = False
 
+    OAUTH_CREDENTIALS = {
+        'yandex': {
+            'id': os.getenv('YANDEX_CLIENT_ID'),
+            'secret': os.getenv('YANDEX_CLIENT_SECRET')
+        }
+    }
+
     RATELIMIT_ENABLED = True
     RATELIMIT_STRATEGY = 'moving-window'
     RATELIMIT_DEFAULT = '1/second'

@@ -24,3 +24,4 @@ pyotp==2.6.0
 redis==4.2.2
 SQLAlchemy==1.4.35
 user-agents==2.2.0
+rauth==0.7.3
