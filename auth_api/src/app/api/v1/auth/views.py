@@ -3,12 +3,14 @@ from http import HTTPStatus
 import pyotp
 from app import limiter
 from app.core.errors import error_response
+from app.core.oauth import OAuthSignIn
+from app.core.utils import generate_random_string, send_fake_email
 from app.db.cache import delete_token, revoke_token
 from app.models.journal import Action, Journal
 from app.models.user import User
 from app.schemas.user import CodeSchema, LoginSchema
 from flasgger import SwaggerView, swag_from
-from flask import abort, jsonify, redirect, request, url_for
+from flask import abort, jsonify, redirect, request, url_for, current_app
 from flask_babel import _
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 from marshmallow import ValidationError
@@ -117,5 +119,49 @@ class CheckAPI(SwaggerView):
         user.events.append(event)
         user.save()
 
+        token_pair = user.encode_token_pair()
+        return jsonify(token_pair), HTTPStatus.OK
+
+
+class OauthAPI(SwaggerView):
+
+    def get(self, provider):
+        oauth = OAuthSignIn.get_provider(provider)
+        return oauth.authorize()
+
+
+class OauthCallbackAPI(SwaggerView):
+
+    def get(self, provider):
+        code = request.args.get('code')
+        if not code:
+            error_code = request.args.get('error')
+            error_description = request.args.get('error_description')
+            message = f'{error_code}: {error_description}'
+            return error_response(HTTPStatus.UNAUTHORIZED, message)
+
+        oauth = OAuthSignIn.get_provider(provider)
+
+        social_id, email, first_name, last_name = oauth.callback()
+
+        if social_id is None:
+            abort(HTTPStatus.UNAUTHORIZED, 'Authentication failed')
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            superuser = current_app.config.get('DEBUG', False)
+            psw = generate_random_string()
+            user = User(email=email, password=psw, is_superuser=superuser)
+            user = user.save()
+            send_fake_email(email, psw)
+            user.profile.update({
+                'last_name': last_name,
+                'first_name': first_name})
+            user.save()
+
+        event = Journal(Action.login, request)
+        user.events.append(event)
+        user.save()
         token_pair = user.encode_token_pair()
         return jsonify(token_pair), HTTPStatus.OK
