@@ -1,3 +1,5 @@
+import uuid
+
 import pytest
 from app import create_app
 from app.core.config import TestingConfig
@@ -33,6 +35,7 @@ def cache(app):
 @pytest.fixture(scope='session')
 def client(app):
     client = app.test_client()
+    client.environ_base['HTTP_X_REQUEST_ID'] = uuid.uuid4()
     yield client
 
 

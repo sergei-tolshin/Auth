@@ -11,9 +11,12 @@ def user_identity_lookup(user):
 
 @jwt.additional_claims_loader
 def additional_claims_lookup(user):
+    roles = [role.name for role in user.roles] or []
+    if user.is_superuser:
+        roles.append('superuser')
+
     claims = {
-        'is_superuser': user.is_superuser,
-        'roles': [role.name for role in user.roles] or []
+        'roles': ','.join(roles)
     }
     return claims
 

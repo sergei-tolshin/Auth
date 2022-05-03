@@ -11,7 +11,8 @@ def superuser_required(fn):
     def decorator(*args, **kwargs):
         verify_jwt_in_request()
         claims = get_jwt()
-        if claims.get('is_superuser', None):
+        roles = claims.get('roles').split(',')
+        if 'superuser' in roles:
             return fn(*args, **kwargs)
         else:
             return jsonify(msg=_('Superuser only!')), HTTPStatus.FORBIDDEN
@@ -25,12 +26,14 @@ def roles_required(*roles):
         def decorator(*args, **kwargs):
             verify_jwt_in_request()
             claims = get_jwt()
-            if claims.get('is_superuser', None):
+            user_roles = claims.get('roles').split(',') or None
+            if 'superuser' in user_roles:
                 return fn(*args, **kwargs)
-            if set(claims.get('roles', None)) == set(roles):
+            if set(user_roles) == set(roles):
                 return fn(*args, **kwargs)
             else:
-                return jsonify(msg=_('Insufficient permissions')), HTTPStatus.FORBIDDEN
+                return jsonify(msg=_('Insufficient permissions')), \
+                    HTTPStatus.FORBIDDEN
 
         return decorator
     return wrapper
@@ -42,11 +45,13 @@ def roles_accepted(*roles):
         def decorator(*args, **kwargs):
             verify_jwt_in_request()
             claims = get_jwt()
-            if claims.get('is_superuser', None):
+            user_roles = claims.get('roles').split(',') or None
+            if 'superuser' in user_roles:
                 return fn(*args, **kwargs)
-            for role in claims.get('roles'):
+            for role in user_roles:
                 if role in roles:
                     return fn(*args, **kwargs)
-            return jsonify(msg=_('Insufficient permissions')), HTTPStatus.FORBIDDEN
+            return jsonify(msg=_('Insufficient permissions')), \
+                HTTPStatus.FORBIDDEN
         return decorator
     return wrapper
