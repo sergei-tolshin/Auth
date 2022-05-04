@@ -1,6 +1,8 @@
 import os
 from datetime import timedelta
 
+from app.core.oauth import OAuthProvider
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -23,9 +25,13 @@ class BaseConfig(object):
     JSON_SORT_KEYS = False
 
     OAUTH_CREDENTIALS = {
-        'yandex': {
+        OAuthProvider.yandex.name: {
             'id': os.getenv('YANDEX_CLIENT_ID'),
-            'secret': os.getenv('YANDEX_CLIENT_SECRET')
+            'secret': os.getenv('YANDEX_CLIENT_SECRET'),
+            'authorize_url': os.getenv('YANDEX_AUTHORIZE_URL'),
+            'access_token_url': os.getenv('YANDEX_ACCESS_TOKEN_URL'),
+            'base_url': os.getenv('YANDEX_BASE_URL'),
+            'scope': os.getenv('YANDEX_SCOPE')
         }
     }
 

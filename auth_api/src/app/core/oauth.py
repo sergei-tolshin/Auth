@@ -1,17 +1,26 @@
-import json
+import enum
+import orjson
 
 from flask import url_for, redirect, current_app, request
 from rauth import OAuth2Service
 
 
-class OAuthSignIn(object):
+class OAuthProvider(enum.Enum):
+    yandex = enum.auto()
+
+
+class OAuthSignIn:
     providers = None
 
     def __init__(self, provider_name):
         self.provider_name = provider_name
         credentials = current_app.config['OAUTH_CREDENTIALS'][provider_name]
-        self.consumer_id = credentials['id']
-        self.consumer_secret = credentials['secret']
+        self.id = credentials['id']
+        self.secret = credentials['secret']
+        self.authorize_url = credentials['authorize_url']
+        self.access_token_url = credentials['access_token_url']
+        self.base_url = credentials['base_url']
+        self.scope = credentials['scope']
 
     def authorize(self):
         pass
@@ -24,37 +33,37 @@ class OAuthSignIn(object):
                        _external=True)
 
     @classmethod
-    def get_provider(self, provider_name):
-        if self.providers is None:
-            self.providers = {}
-            for provider_class in self.__subclasses__():
+    def get_provider(cls, provider_name):
+        if cls.providers is None:
+            cls.providers = {}
+            for provider_class in cls.__subclasses__():
                 provider = provider_class()
-                self.providers[provider.provider_name] = provider
-        return self.providers[provider_name]
+                cls.providers[provider.provider_name] = provider
+        return cls.providers[provider_name]
 
 
 class YandexSignIn(OAuthSignIn):
     def __init__(self):
-        super(YandexSignIn, self).__init__('yandex')
+        super().__init__(OAuthProvider.yandex.name)
         self.service = OAuth2Service(
-            name='yandex',
-            client_id=self.consumer_id,
-            client_secret=self.consumer_secret,
-            authorize_url='https://oauth.yandex.ru/authorize',
-            access_token_url='https://oauth.yandex.ru/token',
-            base_url='https://login.yandex.ru'
+            name=OAuthProvider.yandex.name,
+            client_id=self.id,
+            client_secret=self.secret,
+            authorize_url=self.authorize_url,
+            access_token_url=self.access_token_url,
+            base_url=self.base_url
         )
 
     def authorize(self):
         return redirect(self.service.get_authorize_url(
-            scope='login:email login:info',
+            scope=self.scope,
             response_type='code',
             redirect_uri=self.get_callback_url())
         )
 
     def callback(self):
         def decode_json(payload):
-            return json.loads(payload.decode('utf-8'))
+            return orjson.loads(payload.decode('utf-8'))
 
         if 'code' not in request.args:
             return None
@@ -67,7 +76,7 @@ class YandexSignIn(OAuthSignIn):
         )
 
         user_info = oauth_session.get('info').json()
-        _id = 'yandex$' + user_info.get('id')
+        _id = f'{OAuthProvider.yandex.name}$' + user_info.get('id')
         first_name = user_info.get('first_name')
         last_name = user_info.get('last_name')
         email = user_info.get('default_email').lower()
