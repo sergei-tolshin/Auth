@@ -71,8 +71,8 @@ services:
         context: ./src/grpc
         dockerfile: Dockerfile
     image: grpc_api
-    ports:
-       - 50051:50051
+    expose:
+      - ${GRPC_PORT}
     depends_on:
       - pg_db
       - redis
