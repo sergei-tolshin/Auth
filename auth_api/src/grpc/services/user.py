@@ -1,16 +1,16 @@
 import grpc
 import messages.user_pb2 as user_messages
 import messages.user_pb2_grpc as user_service
-from app import create_app
 from app.models.user import User
 
 
 class UserService(user_service.UserServicer):
+    def __init__(self, app):
+        self.app = app
 
     def GetInfo(self, request, context):
         if request.id:
-            app = create_app()
-            with app.app_context():
+            with self.app.app_context():
                 user = User().find_by_id(request.id)
                 if user:
                     if not user.active:
